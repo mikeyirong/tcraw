@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
 javacOptions ++= Seq("-encoding", "UTF-8")
 
 resolvers ++= Seq(
-     "tvc Repository" at "http://112.74.213.168:8081/nexus/content/groups/public/"
+     "tvc Repository" at "http://nexus.mindcenter.cn:12580/nexus/content/groups/public/"
 )
 
 
@@ -28,7 +28,7 @@ publishMavenStyle := true
 
 
 publishTo <<= version { v: String =>
-  val nexus = "http://112.74.213.168:8081/nexus" 
+  val nexus = "http://nexus.mindcenter.cn:12580/nexus" 
   if (v.trim.endsWith("SNAPSHOT"))
     Some("snapshots" at nexus + "/content/repositories/snapshots/")
   else
