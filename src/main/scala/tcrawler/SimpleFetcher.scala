@@ -39,7 +39,7 @@ class SimpleFetcher[T <: Fetchable] extends ConcurrentCrawler[T] {
   /**
    * Post
    */
-  def fetch_post(url: String)(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T])(body: Array[NameValuePair]): List[T] = {
+  def fetch_post(url: String)(headers: Array[Header])(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T])(body: Array[NameValuePair]): List[T] = {
     var retry: String => List[T] = fetchUrl => {
       logger.info("Network overload, crawler will take a rest at a moment")
       Thread.sleep(3000)
@@ -47,7 +47,7 @@ class SimpleFetcher[T <: Fetchable] extends ConcurrentCrawler[T] {
     }
 
     try {
-      var rawContent = InternetIO.postUrl(url)(body).getBytes
+      var rawContent = InternetIO.postUrl(url, headers)(body).getBytes
       //process disabled
       if (hasBeenDisabled(rawContent)) throw CommunicationChannelDisabledException(url)
       parser(rawContent)

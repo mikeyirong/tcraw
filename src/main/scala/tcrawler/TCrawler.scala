@@ -1,6 +1,7 @@
 package tcrawler
 
 import org.apache.commons.httpclient.NameValuePair
+import org.apache.commons.httpclient.Header
 
 /**
  * Generic Crawler definition
@@ -22,5 +23,5 @@ trait TCrawler[T <: Fetchable] extends LoggingSupport {
    * @param hasBeenDisabled : Returns test if the current communication channel has been disabled by the target web-site
    * @param howToContinue: Provide a strategy the described how to continue the fetch task when the communication has been disabled by the target web-site
    */
-  def fetch_post(url: String)(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T])(body: Array[NameValuePair]): List[T]
+  def fetch_post(url: String)(header: Array[Header] = Array[Header]())(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T])(body: Array[NameValuePair]): List[T]
 }

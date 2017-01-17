@@ -5,6 +5,7 @@ import JavaVirtualMachine._
 import org.w3c.dom.Document
 import java.util.concurrent.RecursiveTask
 import org.apache.commons.httpclient.NameValuePair
+import org.apache.commons.httpclient.Header
 
 /**
  * Concurrent crawler
@@ -62,11 +63,11 @@ trait ConcurrentCrawler[T <: Fetchable] extends TCrawler[T] {
    * @param hasBeenDisabled : Returns test if the current communication channel has been disabled by the target web-site
    * @param howToContinue: Provide a strategy the described how to continue the fetch task when the communication has been disabled by the target web-site
    */
-  def concurrent_fetch_post(urls: Array[String])(body: Array[NameValuePair])(processor: List[T] => Unit)(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T]): Unit = {
+  def concurrent_fetch_post(urls: Array[String])(headers: Array[Header] = Array[Header]())(body: Array[NameValuePair])(processor: List[T] => Unit)(parser: Array[Byte] => List[T])(hasBeenDisabled: Array[Byte] => Boolean)(howToContinue: String => List[T]): Unit = {
     this.fkPool.submit(new RecursiveTask[Unit] {
       def compute(): Unit = urls.map(url => {
         var task = (new RecursiveTask[Unit] {
-          def compute(): Unit = processor(fetch_post(url)(parser)(hasBeenDisabled)(howToContinue)(body))
+          def compute(): Unit = processor(fetch_post(url)(headers)(parser)(hasBeenDisabled)(howToContinue)(body))
         })
         task.fork()
         task
