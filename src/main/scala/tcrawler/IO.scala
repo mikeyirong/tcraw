@@ -1,17 +1,19 @@
 package tcrawler
 
 import java.io.ByteArrayOutputStream
-
-import JavaVirtualMachine.StringLike
-import org.apache.commons.httpclient.SimpleHttpConnectionManager
-import org.apache.commons.httpclient.params.HttpClientParams
-import org.apache.commons.httpclient.HttpClient
-import org.apache.commons.httpclient.methods.GetMethod
-import org.apache.commons.httpclient.DefaultMethodRetryHandler
+import java.net.HttpCookie
 import java.nio.charset.Charset
+
+import org.apache.commons.httpclient.DefaultMethodRetryHandler
 import org.apache.commons.httpclient.Header
-import org.apache.commons.httpclient.methods.PostMethod
+import org.apache.commons.httpclient.HttpClient
 import org.apache.commons.httpclient.NameValuePair
+import org.apache.commons.httpclient.SimpleHttpConnectionManager
+import org.apache.commons.httpclient.methods.GetMethod
+import org.apache.commons.httpclient.methods.PostMethod
+import org.apache.commons.httpclient.params.HttpClientParams
+
+import scala.collection.JavaConversions._
 
 /**
  * Communication channel of Internet I/O
@@ -78,10 +80,16 @@ object InternetIO extends LoggingSupport {
       if (post != null) post.releaseConnection();
     }
   }
+
   /**
    * Returns byte stream from the specified URL
    */
-  def fromUrl(url: String, headers: Array[Header] = Array[Header]()): String = {
+  def fromUrl(url: String, headers: Array[Header] = Array[Header]()): String = rawfromUrl(url, headers, x => ())
+
+  /**
+   * Returns byte stream from the specified URL
+   */
+  def rawfromUrl(url: String, headers: Array[Header] = Array[Header](), fn: HttpCookie => Unit): String = {
     var get: GetMethod = null
     try {
       logger.info("Fetch url {}", url)
@@ -129,6 +137,10 @@ object InternetIO extends LoggingSupport {
             out.write(bytes, 0, i)
         } while (i != -1)
 
+        get.getResponseHeaders.filter(_.getName.toUpperCase.equals("SET-COOKIE")).map(_.getValue)
+          .map(cookiestring => {
+            HttpCookie.parse(cookiestring)
+          }).foreach(x => x.foreach(fn))
         var s = new String(out.toByteArray(), encoding)
         s
       }
